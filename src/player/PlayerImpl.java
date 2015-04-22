@@ -4,7 +4,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
 public class PlayerImpl extends UnicastRemoteObject implements Player {
-
     public PlayerImpl() throws RemoteException {
     }
 
