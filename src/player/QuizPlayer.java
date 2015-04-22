@@ -18,14 +18,8 @@ public class QuizPlayer {
         try {
             // fire to localhost port 1099
             Registry reg = LocateRegistry.getRegistry("127.0.0.1", 1099);
-
             player = (Player) reg.lookup("player");
-
             playerId = userNameCheck();
-
-
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -66,7 +60,6 @@ public class QuizPlayer {
      * @param output  The message to prompt the user
      * @return the input string from the user.
      */
-
     private String getStringFromUser(String output) {
         String input;
         System.out.println(output);
@@ -80,7 +73,11 @@ public class QuizPlayer {
         }
         return input;
     }
-
+    /**
+     * Gets a integer input from the user - does some checking to see if it is valid
+     * @param output  The message to prompt the user
+     * @return the input int from the user.
+     */
     private int getIntFromUser(String output) {
         int input;
         System.out.println(output);

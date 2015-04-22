@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<quizData>
+    <users>
+        <user>
+            <id>1</id>
+            <age>42</age>
+            <username>david</username>
+            <location>london</location>
+        </user>
+        <user>
+            <id>2</id>
+            <age>31</age>
+            <username>John</username>
+            <location>london</location>
+        </user>
+    </users>
+    <quizzes>
+        <quiz>
+            <id>1</id>
+            <title>Capital cities</title>
+            <questions>
+                <question>
+                    <text>What is the capital of mexico?</text>
+                    <options>
+                        <option>London</option>
+                        <option>Mexico City</option>
+                        <option>Helsinki</option>
+                        <option>Copenhagen</option>
+                    </options>
+                    <answer>2</answer>
+                </question>
+            </questions>
+            <question>
+                <text>What is the capital of Denmark?</text>
+                <options>
+                    <option>Oslo</option>
+                    <option>Copenhagen</option>
+                    <option>Accra</option>
+                    <option>Paris</option>
+                </options>
+                <answer>2</answer>
+            </question>
+            <question>
+                <text>What is the capital of Ghana?</text>
+                <options>
+                    <option>Cape town</option>
+                    <option>Libraville</option>
+                    <option>Accra</option>
+                    <option>Sydney</option>
+                </options>
+                <answer>3</answer>
+            </question>
+        </quiz>
+    </quizzes>
+    <results>
+        <result>
+            <quiz>1</quiz>
+            <user>2</user>
+            <result>1/3</result>
+        </result>
+    </results>
+</quizData>
