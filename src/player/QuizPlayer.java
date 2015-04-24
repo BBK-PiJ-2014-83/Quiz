@@ -6,7 +6,7 @@ import java.rmi.registry.Registry;
 
 public class QuizPlayer {
     Scanner sc;
-    Player player;
+    PlayerSession playerSession;
     int playerId;
     public static void main(String[] args) {
         QuizPlayer session = new QuizPlayer();
@@ -18,7 +18,8 @@ public class QuizPlayer {
         try {
             // fire to localhost port 1099
             Registry reg = LocateRegistry.getRegistry("127.0.0.1", 1099);
-            player = (Player) reg.lookup("player");
+            playerSession = (PlayerSession) reg.lookup("player");
+            //
             playerId = userNameCheck();
         } catch (Exception e) {
             e.printStackTrace();
@@ -33,11 +34,11 @@ public class QuizPlayer {
         int id;
         switch (input) {
             case "y" :
-                id = player.getPlayer(getUserName(false));
+                id = playerSession.getPlayer(getUserName(false));
                 break;
             case "n" :
                 System.out.println("Please register below.....");
-                id = player.createPlayer(getUserName(true), getIntFromUser("Please enter your age"), getStringFromUser("Please enter your location"));
+                id = playerSession.createPlayer(getUserName(true), getIntFromUser("Please enter your age"), getStringFromUser("Please enter your location"));
                 break;
             default:
                 System.out.println("I didn't understand that. Please try again!");

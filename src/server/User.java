@@ -14,6 +14,6 @@ public class User {
     }
 
     public int getId(String username){
-        return 5;
+        return this.id;
     }
 }
