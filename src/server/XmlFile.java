@@ -24,7 +24,6 @@ public class XmlFile {
     DocumentBuilderFactory docBuilder;
     DocumentBuilder dbuilder;
 
-
     public XmlFile() {
         try {
             docBuilder = DocumentBuilderFactory.newInstance();
@@ -43,8 +42,8 @@ public class XmlFile {
             //Load up file
             File xmlFile = new File( SRC + "/" + filename + ".xml");
             //Parse the document to xml
-            Document meetingData = dbuilder.parse(xmlFile);
-            return meetingData;
+            Document quizData = dbuilder.parse(xmlFile);
+            return quizData;
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

@@ -3,6 +3,7 @@ package server;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -25,15 +26,30 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
      * @param username of the user that you wish to load.
      * @return the id of the user
      */
-    public int getPlayer(String username) throws RemoteException {
+    public int getPlayer(String username) throws RemoteException,IllegalArgumentException {
         //for now let's just return 5
-        System.out.println(username);
-        return 5;
+        Optional<User> user = users.stream().
+                filter(p -> (p.getUsername().toLowerCase().equals(username.toLowerCase()))).
+                findFirst();
+        if(!(user.isPresent())) {
+            throw new IllegalArgumentException("This username doesn't exist! Please try again.");
+        }
+        return user.get().getId();
     }
 
-    public int createPlayer(String username, int age, String location ) throws RemoteException {
-        //for now let's just return 4
-        return 4;
+    public int createPlayer(String username, int age, String location ) throws RemoteException,IllegalArgumentException {
+        Optional<User> user = users.stream().
+                filter(p -> (p.getUsername().toLowerCase().equals(username.toLowerCase()))).
+                findFirst();
+        if(user.isPresent()) {
+            throw new IllegalArgumentException("This username is taken. Please try again.");
+        }
+        try{
+            User newUser = new User(users.size(), username, age, location);
+            return newUser.getId();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
     /**
      * Load the file and populate the users, quizzes and results
@@ -43,7 +59,9 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
         quizData = file.readFile(fileName);
         loadUsers();
     }
-
+    /**
+     * From the file that has been loaded, take all the users and populate the user array list
+     * */
     private void loadUsers() {
         NodeList userList = file.getItems("user", quizData);
         for (int i = 0; i < userList.getLength() ; i++) {
@@ -68,5 +86,10 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
             users.add(new User(id,username,age,location));
         }
     }
+    /**
+     * Saves everything back to the xml file for persistence. This should be done after every new user is created, every new quiz is created and each result is stored.
+     * */
+    private void saveAll() {
 
+    }
 }

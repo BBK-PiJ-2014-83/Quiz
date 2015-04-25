@@ -13,7 +13,9 @@ public class User {
         this.location = location;
     }
 
-    public int getId(String username){
+    public int getId(){
         return this.id;
     }
+    public String getUsername(){
+        return this.username;}
 }

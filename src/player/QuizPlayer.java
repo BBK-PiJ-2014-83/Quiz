@@ -10,16 +10,20 @@ public class QuizPlayer {
     int playerId;
     public static void main(String[] args) {
         QuizPlayer session = new QuizPlayer();
+
         session.begin();
     }
-
+    /**
+     * Boots everything up and welcomes the user to the program
+     */
     private void begin(){
         sc = new Scanner(System.in);
         try {
             // fire to localhost port 1099
             Registry reg = LocateRegistry.getRegistry("127.0.0.1", 1099);
-            playerSession = (PlayerSession) reg.lookup("player");
+            playerSession = (PlayerSession) reg.lookup("playerSession");
             //
+            System.out.println("Welcome to the quiz program! Type exit to close at any time.");
             playerId = userNameCheck();
         } catch (Exception e) {
             e.printStackTrace();
@@ -29,21 +33,31 @@ public class QuizPlayer {
      * Asks the user whether they are already registered on the system. If not it registers them.
      */
     private int userNameCheck() throws RemoteException {
-        System.out.println("Do you already have a username? Enter y if yes and n if no");
+
+        System.out.println("Do you already have a username? Enter y if yes and n if no.");
         String input = sc.nextLine();
         int id;
-        switch (input) {
-            case "y" :
-                id = playerSession.getPlayer(getUserName(false));
-                break;
-            case "n" :
-                System.out.println("Please register below.....");
-                id = playerSession.createPlayer(getUserName(true), getIntFromUser("Please enter your age"), getStringFromUser("Please enter your location"));
-                break;
-            default:
-                System.out.println("I didn't understand that. Please try again!");
-                id = userNameCheck();
+        try{
+            switch (input) {
+                case "y" :
+                    id = playerSession.getPlayer(getUserName(false));
+                    break;
+                case "n" :
+                   System.out.println("Please register below.....");
+                    String username = getUserName(true);
+                    int age = getIntFromUser("Please enter your age");
+                    String location = getStringFromUser("Please enter your location");
+                    id = playerSession.createPlayer(username,age ,location);
+                   break;
+                default:
+                    System.out.println("I didn't understand that. Please try again!");
+                    id = userNameCheck();
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+            id = userNameCheck();
         }
+        System.out.println(id);
         return id;
     }
     /**
@@ -52,9 +66,7 @@ public class QuizPlayer {
      * @return the players username
      */
     private String getUserName(boolean newUser) {
-        String username = getStringFromUser("Please enter your "+((newUser)?"preferred":"")+" username");
-        System.out.println("Please enter your "+((newUser)?"preferred":"")+" username");
-        return username;
+        return getStringFromUser("Please enter your "+((newUser)?"preferred ":"")+"username");
     }
     /**
      * Gets a string input from the user - does some checking to see if it is valid
@@ -80,10 +92,28 @@ public class QuizPlayer {
      * @return the input int from the user.
      */
     private int getIntFromUser(String output) {
-        int input;
         System.out.println(output);
-        input = sc.nextInt();
-        return input;
+        String tmpInput = sc.nextLine();
+        if (isNumeric(tmpInput)){
+            return Integer.parseInt(tmpInput);
+        } else {
+            System.out.println("That's not a valid integer. Please try again!");
+            return getIntFromUser(output);
+        }
+    }
+    /**
+     * A simple method to check whether the user input is an integer or not
+     * @param value The string that we are going to try to pass
+     * @return whether it is a number or not
+     */
+    private static boolean isNumeric(String value) {
+        try  {
+            int test = Integer.parseInt(value);
+
+        } catch(NumberFormatException nfe)  {
+            return false;
+        }
+        return true;
     }
 
 }
