@@ -3,7 +3,9 @@ package server;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -15,10 +17,12 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
     XmlFile file;
     Document quizData;
     ArrayList<User> users;
+    ArrayList<Quiz> quizzes;
     public PlayerSessionImpl() throws RemoteException {
         //First load xml file with user and quiz data
         file = new XmlFile();
         users = new ArrayList<User>();
+        quizzes = new ArrayList<Quiz>();
         loadFile("data");
     }
     /**
@@ -52,12 +56,24 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
         }
     }
     /**
+     * Return a list of quizzes so the user can choose
+     * @return quizList The full list of quizzes available.
+     */
+    public List<String> getQuizList() {
+        List<String> quizList = this.quizzes.stream().map(item-> item.getTitle()).collect(Collectors.toList());
+        for (int i = 0; i < quizList.size(); i++) {
+            System.out.println(quizList.get(i));
+        }
+        return quizList;
+    }
+    /**
      * Load the file and populate the users, quizzes and results
      * @param fileName Enables you to specify a filename.
      */
     private void loadFile(String fileName) {
         quizData = file.readFile(fileName);
         loadUsers();
+        loadQuizzes();
     }
     /**
      * From the file that has been loaded, take all the users and populate the user array list
@@ -84,6 +100,65 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
                 }
             }
             users.add(new User(id,username,age,location));
+        }
+    }
+    /**
+     * From the file that has been loaded, take all the quizzes and populate the quiz array list
+     * */
+    private void loadQuizzes() {
+
+        NodeList quizList = file.getItems("quiz", quizData);
+        //first loop through each quiz
+        for (int i = 0; i < quizList.getLength() ; i++) {
+            NodeList quiz = quizList.item(i).getChildNodes();
+            Quiz tmpQuiz = new Quiz();
+
+            for (int j = 0; j < quiz.getLength(); j++) {
+                //Create an empty quiz and populate as we go through
+                Node detail = quiz.item(j);
+                switch (detail.getNodeName()) {
+                    case "id":
+                        tmpQuiz.setId(Integer.parseInt(detail.getTextContent()));
+                        break;
+                    case "creatorId":
+                        tmpQuiz.setCreatorId(Integer.parseInt(detail.getTextContent()));
+                        break;
+                    case "title":
+                        tmpQuiz.setTitle(detail.getTextContent());
+                        break;
+                    case "questions":
+                        //Loop through the questions
+                        NodeList questionList = detail.getChildNodes();
+                        for (int k = 0; k < questionList.getLength(); k++) {
+                            //Loop through the question fields
+                            NodeList questionFlds = questionList.item(k).getChildNodes();
+                            Question tmpQuestion = new Question();
+
+                            for (int l = 0; l < questionFlds.getLength(); l++) {
+                                Node questionFld = questionFlds.item(l);
+                                switch (questionFld.getNodeName()) {
+                                    case "text":
+                                        tmpQuestion.setText(questionFld.getTextContent());
+                                        break;
+                                    case "answer":
+                                        tmpQuestion.setAnswer(Integer.parseInt(questionFld.getTextContent()));
+                                        break;
+                                    case "options":
+                                        NodeList optionList = questionFld.getChildNodes();
+                                        for (int m = 0; m < optionList.getLength(); m++) {
+                                            QuestionOption tmpOption = new QuestionOption();
+                                            Node option = optionList.item(m).getFirstChild();
+                                            tmpOption.setText(option.getTextContent());
+                                            tmpQuestion.addOption(tmpOption);
+                                        }
+                                        break;
+                                }
+                            }
+                            tmpQuiz.addQuestion(tmpQuestion);
+                        }
+                }
+            }
+            this.quizzes.add(tmpQuiz);
         }
     }
     /**

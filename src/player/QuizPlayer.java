@@ -1,5 +1,6 @@
 package player;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Scanner;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -25,6 +26,8 @@ public class QuizPlayer {
             //
             System.out.println("Welcome to the quiz program! Type exit to close at any time.");
             playerId = userNameCheck();
+            System.out.println("/nThanks for joining us! Please select the quiz you would like to attempt from the list below");
+            selectQuiz();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -85,6 +88,14 @@ public class QuizPlayer {
             input = getStringFromUser(output);
         }
         return input;
+    }
+    /**
+     * Prints the list of available quizzes and get's the user the select one.
+     * @return the players username
+     */
+    public void selectQuiz() throws RemoteException {
+        List<String> quizList = playerSession.getQuizList();
+        quizList.stream().forEach(System.out::println);
     }
     /**
      * Gets a integer input from the user - does some checking to see if it is valid

@@ -4,6 +4,9 @@ package server;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
@@ -27,6 +30,9 @@ public class XmlFile {
     public XmlFile() {
         try {
             docBuilder = DocumentBuilderFactory.newInstance();
+            //need this to ignore the annoying whitespace that's causing issues
+
+
             dbuilder = docBuilder.newDocumentBuilder();
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -42,7 +48,10 @@ public class XmlFile {
             //Load up file
             File xmlFile = new File( SRC + "/" + filename + ".xml");
             //Parse the document to xml
+
             Document quizData = dbuilder.parse(xmlFile);
+            Element root = quizData.getDocumentElement();
+            removeWhiteSpace(root);
             return quizData;
 
         } catch (Exception e) {
@@ -92,6 +101,21 @@ public class XmlFile {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return false;
+        }
+    }
+
+    public static void removeWhiteSpace(Node e) {
+        NodeList children = e.getChildNodes();
+        for (int i = children.getLength() - 1; i >= 0; i--) {
+            Node child = children.item(i);
+            if (child instanceof Text && ((Text) child).getData().trim().length() == 0)  {
+                e.removeChild(child);
+            } else if (child.getNodeName().equals("#text")) {
+
+            }
+            else if (child.hasChildNodes()) {
+                removeWhiteSpace(child);
+            }
         }
     }
 
