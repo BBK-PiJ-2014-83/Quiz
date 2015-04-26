@@ -1,5 +1,9 @@
 package player;
+import server.Question;
+import server.QuestionOption;
+
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.rmi.registry.LocateRegistry;
@@ -9,9 +13,9 @@ public class QuizPlayer {
     Scanner sc;
     PlayerSession playerSession;
     int playerId;
+    String username;
     public static void main(String[] args) {
         QuizPlayer session = new QuizPlayer();
-
         session.begin();
     }
     /**
@@ -26,7 +30,7 @@ public class QuizPlayer {
             //
             System.out.println("Welcome to the quiz program! Type exit to close at any time.");
             playerId = userNameCheck();
-            System.out.println("/nThanks for joining us! Please select the quiz you would like to attempt from the list below");
+            System.out.println("\nThanks for joining us! Below is a list of quizzes.\n");
             selectQuiz();
         } catch (Exception e) {
             e.printStackTrace();
@@ -36,7 +40,6 @@ public class QuizPlayer {
      * Asks the user whether they are already registered on the system. If not it registers them.
      */
     private int userNameCheck() throws RemoteException {
-
         System.out.println("Do you already have a username? Enter y if yes and n if no.");
         String input = sc.nextLine();
         int id;
@@ -47,7 +50,6 @@ public class QuizPlayer {
                     break;
                 case "n" :
                    System.out.println("Please register below.....");
-                    String username = getUserName(true);
                     int age = getIntFromUser("Please enter your age");
                     String location = getStringFromUser("Please enter your location");
                     id = playerSession.createPlayer(username,age ,location);
@@ -69,7 +71,8 @@ public class QuizPlayer {
      * @return the players username
      */
     private String getUserName(boolean newUser) {
-        return getStringFromUser("Please enter your "+((newUser)?"preferred ":"")+"username");
+        username = getStringFromUser("Please enter your "+((newUser)?"preferred ":"")+"username");
+        return username;
     }
     /**
      * Gets a string input from the user - does some checking to see if it is valid
@@ -90,12 +93,30 @@ public class QuizPlayer {
         return input;
     }
     /**
-     * Prints the list of available quizzes and get's the user the select one.
-     * @return the players username
+     * Prints the list of available quizzes and gets the user the select one. Once they have selected one they go to doQuiz where they attempt a quiz.
      */
     public void selectQuiz() throws RemoteException {
         List<String> quizList = playerSession.getQuizList();
         quizList.stream().forEach(System.out::println);
+        int quiz = getIntFromUser("\nPlease select the number of the quiz you would like to attempt.");
+        ArrayList<Question> questionList = playerSession.getQuizQuestions(quiz);
+        doQuiz(quiz, questionList);
+    }
+    /**
+     * Prints the list of questions for the quiz and gets an answer for each question
+     */
+    public void doQuiz(int id, ArrayList<Question> questionList) {
+        int score = 0;
+        for (int i = 0; i < questionList.size() ; i++) {
+            System.out.println((i + 1) + ". " + questionList.get(i).getText()+ "\n");
+            ArrayList<QuestionOption> options = questionList.get(i).getOptions();
+            for (int j = 0; j < options.size(); j++) {
+                System.out.println((j + 1) + ". " + options.get(j).getText());
+            }
+            int answer = getIntFromUser("Choose the number of your answer below.");
+            score = (answer == questionList.get(i).getAnswer()) ? score + 1 : score;
+        }
+        System.out.println("Your score was " + score + "/" + (questionList.size()));
     }
     /**
      * Gets a integer input from the user - does some checking to see if it is valid

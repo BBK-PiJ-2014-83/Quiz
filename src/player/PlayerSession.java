@@ -1,6 +1,9 @@
 package player;
+import server.Question;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface PlayerSession extends Remote {
@@ -10,5 +13,6 @@ public interface PlayerSession extends Remote {
     int createPlayer(String username, int age, String location) throws RemoteException;
     //Used to get a list of the quizzes available
     List<String> getQuizList() throws RemoteException;
-
+    //Used to get the questions for a quiz
+    ArrayList<Question> getQuizQuestions(int id) throws RemoteException;
 }

@@ -27,13 +27,15 @@ public class Quiz {
         this.title = title;
     }
 
+    public int getId() { return this.id;}
     public String getTitle() {
         return this.title;
     }
+    public ArrayList<Question> getQuestions() {return this.questions;}
     /**
      * Add a question to the quiz
-     * @param  of the user that you wish to load.
-     * @return the id of the user
+     * @param question that is going to be added to the list of questions
+     * @return Whether the operation has been successful
      */
     public boolean addQuestion(Question question) {
         this.questions.add(question);

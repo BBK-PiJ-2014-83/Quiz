@@ -31,7 +31,7 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
      * @return the id of the user
      */
     public int getPlayer(String username) throws RemoteException,IllegalArgumentException {
-        //for now let's just return 5
+
         Optional<User> user = users.stream().
                 filter(p -> (p.getUsername().toLowerCase().equals(username.toLowerCase()))).
                 findFirst();
@@ -60,11 +60,21 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
      * @return quizList The full list of quizzes available.
      */
     public List<String> getQuizList() {
-        List<String> quizList = this.quizzes.stream().map(item-> item.getTitle()).collect(Collectors.toList());
+        List<String> quizList = this.quizzes.stream().map(item -> item.getId() + " - " + item.getTitle()).collect(Collectors.toList());
         for (int i = 0; i < quizList.size(); i++) {
             System.out.println(quizList.get(i));
         }
         return quizList;
+    }
+
+    /**
+     * Return a list of questions for a particular quiz so the user can choose
+     * @param id The id of the quiz that you are getting the questions for
+     * @return questionList The full list of questions for that quiz
+     */
+    public ArrayList<Question> getQuizQuestions(int id) {
+        ArrayList<Question> questionList = this.quizzes.get(id).getQuestions();
+        return questionList;
     }
     /**
      * Load the file and populate the users, quizzes and results
