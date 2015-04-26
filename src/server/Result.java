@@ -9,4 +9,11 @@ public class Result {
         this.userId = userId;
         this.result = result;
     }
+    public int getUserId(){
+        return this.userId;
+    }
+    public int getQuizId(){
+        return this.quizId;
+    }
+    public String getResult() { return this.result;}
 }

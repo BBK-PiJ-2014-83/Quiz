@@ -49,7 +49,8 @@ public class QuizPlayer {
                     id = playerSession.getPlayer(getUserName(false));
                     break;
                 case "n" :
-                   System.out.println("Please register below.....");
+                    System.out.println("Please register below.....");
+                    username = getUserName(true);
                     int age = getIntFromUser("Please enter your age");
                     String location = getStringFromUser("Please enter your location");
                     id = playerSession.createPlayer(username, age, location);
@@ -105,7 +106,7 @@ public class QuizPlayer {
     /**
      * Prints the list of questions for the quiz and gets an answer for each question
      */
-    public void doQuiz(int id, ArrayList<Question> questionList) {
+    public void doQuiz(int id, ArrayList<Question> questionList) throws RemoteException{
         int score = 0;
         for (int i = 0; i < questionList.size() ; i++) {
             System.out.println((i + 1) + ". " + questionList.get(i).getText()+ "\n");
@@ -116,6 +117,8 @@ public class QuizPlayer {
             int answer = getIntFromUser("Choose the number of your answer below.");
             score = (answer == questionList.get(i).getAnswer()) ? score + 1 : score;
         }
+        //Save the player's score
+        playerSession.recordScore(id, playerId, score + "/" + questionList.size());
         System.out.println("Your score was " + score + "/" + (questionList.size()));
     }
     /**
