@@ -16,6 +16,9 @@ public class User {
     public int getId(){
         return this.id;
     }
-    public String getUsername(){
-        return this.username;}
+    public int getAge(){
+        return this.age;
+    }
+    public String getLocation() {return this.location;}
+    public String getUsername(){return this.username;}
 }

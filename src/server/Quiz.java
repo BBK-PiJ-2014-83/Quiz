@@ -23,6 +23,10 @@ public class Quiz {
     public void setCreatorId(int id){
         this.creatorId = id;
     }
+    public int getCreatorId(){
+        return this.creatorId;
+    }
+
     public void setTitle(String title){
         this.title = title;
     }

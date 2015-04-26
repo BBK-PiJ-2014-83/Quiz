@@ -52,7 +52,7 @@ public class QuizPlayer {
                    System.out.println("Please register below.....");
                     int age = getIntFromUser("Please enter your age");
                     String location = getStringFromUser("Please enter your location");
-                    id = playerSession.createPlayer(username,age ,location);
+                    id = playerSession.createPlayer(username, age, location);
                    break;
                 default:
                     System.out.println("I didn't understand that. Please try again!");

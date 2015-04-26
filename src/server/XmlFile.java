@@ -17,9 +17,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 /**
  * A class to handle loading, saving and creating of parts of xml files.
- * I've tried to keep it as non-specific to this project as possible so that it can be re-used.
- *
- *
  */
 
 public class XmlFile {

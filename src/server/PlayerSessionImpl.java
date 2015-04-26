@@ -8,9 +8,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import player.PlayerSession;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 
 public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSession {
@@ -18,11 +22,13 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
     Document quizData;
     ArrayList<User> users;
     ArrayList<Quiz> quizzes;
+    ArrayList<Result> results;
     public PlayerSessionImpl() throws RemoteException {
         //First load xml file with user and quiz data
         file = new XmlFile();
         users = new ArrayList<User>();
         quizzes = new ArrayList<Quiz>();
+        results = new ArrayList<Result>();
         loadFile("data");
     }
     /**
@@ -172,9 +178,83 @@ public class PlayerSessionImpl extends UnicastRemoteObject implements PlayerSess
         }
     }
     /**
+     * From the file that has been loaded, take all the results and populate the user array list
+     * */
+    private void loadResults() {
+        NodeList resultList = file.getItems("result", quizData);
+        for (int i = 0; i < resultList.getLength() ; i++) {
+            int userId = 0, quizId = 0;
+            String result ="";
+            NodeList resultItems = resultList.item(i).getChildNodes();
+            for (int j = 0; j < resultItems.getLength(); j++) {
+                Node detail = resultItems.item(j);
+                switch (detail.getNodeName()) {
+                    case "userid":
+                        userId = Integer.parseInt(detail.getTextContent());
+                        break;
+                    case "quizid":
+                        quizId = Integer.parseInt(detail.getTextContent());
+                    case "username":
+                        result = detail.getTextContent();
+                        break;
+                }
+            }
+            results.add(new Result(quizId,userId,result));
+        }
+    }
+    /**
      * Saves everything back to the xml file for persistence. This should be done after every new user is created, every new quiz is created and each result is stored.
      * */
     private void saveAll() {
+        try {
+            DocumentBuilderFactory docBuilder = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dbuilder = docBuilder.newDocumentBuilder();
+            Document quizData = dbuilder.newDocument();
+            Element rootElement = quizData.createElement("quizData");
+            //Add the root element
+            quizData.appendChild(rootElement);
+            Element usersXML =  quizData.createElement("users");
+            //Loop through each user adding it to the document.
+            for (User user : users) {
+                Element tmpUser=  quizData.createElement("user");
+                file.createNode(quizData,"id",Integer.toString(user.getId()), tmpUser);
+                file.createNode(quizData,"username",user.getUsername(),tmpUser);
+                file.createNode(quizData,"location",user.getLocation(),tmpUser);
+                file.createNode(quizData,"age",Integer.toString(user.getAge()), tmpUser);
+                usersXML.appendChild(tmpUser);
+            }
+            rootElement.appendChild(usersXML);
+            //now deal with the quizzes themselves. Urgh.....
+            Element quizzesXML =  quizData.createElement("quizzes");
+            for (Quiz quiz : quizzes) {
 
+                Element tmpQuiz =  quizData.createElement("quiz");
+                file.createNode(quizData,"id",Integer.toString(quiz.getId()),tmpQuiz);
+                file.createNode(quizData,"creatorId",Integer.toString(quiz.getCreatorId()), tmpQuiz);
+                file.createNode(quizData,"title",quiz.getTitle(),tmpQuiz);
+                for(Question question: quiz.getQuestions()) {
+                    Element tmpQuestion = quizData.createElement("question");
+                }
+                quizzesXML.appendChild(tmpQuiz);
+            }
+            rootElement.appendChild(futureXML);
+            //Now past meetings
+            Element pastXML =  meetingData.createElement("pastMeetings");
+            for (PastMeeting meeting : pastMeetings) {
+                //Convert to a temp meeting impl so you can use the getContactsAsString method
+                PastMeetingImpl tmpMeetingImpl = (PastMeetingImpl) meeting;
+                Element tmpMeeting =  meetingData.createElement("pastMeeting");
+                file.createNode(meetingData,"id",Integer.toString(meeting.getId()),tmpMeeting);
+                file.createNode(meetingData,"contacts",tmpMeetingImpl.getContactsAsString(), tmpMeeting);
+                file.createNode(meetingData,"date",df.format(meeting.getDate().getTime()),tmpMeeting);
+                file.createNode(meetingData,"notes",tmpMeetingImpl.getNotes(),tmpMeeting);
+                pastXML.appendChild(tmpMeeting);
+            }
+            rootElement.appendChild(pastXML);
+            System.out.println((file.saveFile(filename,meetingData)) ? "File saved!" : "File save didn't work!");
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
