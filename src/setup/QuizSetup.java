@@ -27,7 +27,7 @@ public class QuizSetup {
             // fire to localhost port 1099
             Registry reg = LocateRegistry.getRegistry("127.0.0.1", 1099);
             setupSession = (SetupSession) reg.lookup("setupSession");
-            System.out.println("Welcome to the quiz program! You are in the setup client.\n Type exit to close at any time.");
+            System.out.println("Welcome to the quiz program! You are in the setup client.\nType exit to close at any time.");
             userId = userNameCheck();
             System.out.println("\nThanks for joining us, "+username+". Please select what you would like to do from the list below");
             createQuiz();
@@ -83,7 +83,11 @@ public class QuizSetup {
         String input;
         System.out.println(output);
         input = sc.nextLine();
-        if ((input == null) || (input == "")) {
+        if (input.equals("exit")) {
+            System.out.println("Thanks for stopping by!");
+            System.exit(0);
+            return "";
+        } else if ((input == null) || (input == "")) {
             System.out.println("Please enter something!");
             input = getStringFromUser(output);
         } else if (input.length() > 100) {
