@@ -1,20 +1,21 @@
-package player;
+package setup;
+
 import server.Question;
-import server.QuestionOption;
+
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
-public class QuizPlayer {
+public class QuizSetup {
     Scanner sc;
-    PlayerSession playerSession;
-    int playerId;
+    SetupSession setupSession;
+    int userId;
     String username;
     public static void main(String[] args) {
-        QuizPlayer session = new QuizPlayer();
+        QuizSetup session = new QuizSetup();
         session.begin();
     }
     /**
@@ -25,12 +26,11 @@ public class QuizPlayer {
         try {
             // fire to localhost port 1099
             Registry reg = LocateRegistry.getRegistry("127.0.0.1", 1099);
-            playerSession = (PlayerSession) reg.lookup("playerSession");
-
-            System.out.println("Welcome to the quiz program! Type exit to close at any time.");
-            playerId = userNameCheck();
-            System.out.println("\nThanks for joining us! Below is a list of quizzes.\n");
-            selectQuiz();
+            setupSession = (SetupSession) reg.lookup("setupSession");
+            System.out.println("Welcome to the quiz program! You are in the setup client.\n Type exit to close at any time.");
+            userId = userNameCheck();
+            System.out.println("\nThanks for joining us, "+username+". Please select what you would like to do from the list below");
+            createQuiz();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -45,15 +45,15 @@ public class QuizPlayer {
         try{
             switch (input) {
                 case "y" :
-                    id = playerSession.getPlayer(getUserName(false));
+                    id = setupSession.getUser(getUserName(false));
                     break;
                 case "n" :
                     System.out.println("Please register below.....");
                     username = getUserName(true);
                     int age = getIntFromUser("Please enter your age");
                     String location = getStringFromUser("Please enter your location");
-                    id = playerSession.createPlayer(username, age, location);
-                   break;
+                    id = setupSession.createUser(username, age, location);
+                    break;
                 default:
                     System.out.println("I didn't understand that. Please try again!");
                     id = userNameCheck();
@@ -86,7 +86,7 @@ public class QuizPlayer {
         if ((input == null) || (input == "")) {
             System.out.println("Please enter something!");
             input = getStringFromUser(output);
-        } else if (input.length() > 20) {
+        } else if (input.length() > 100) {
             System.out.println("That's too long, I'm afraid. Needs to be under 20 characters.");
             input = getStringFromUser(output);
         }
@@ -95,30 +95,29 @@ public class QuizPlayer {
     /**
      * Prints the list of available quizzes and gets the user the select one. Once they have selected one they go to doQuiz where they attempt a quiz.
      */
-    public void selectQuiz() throws RemoteException {
-        List<String> quizList = playerSession.getQuizList();
-        quizList.stream().forEach(System.out::println);
-        int quiz = getIntFromUser("\nPlease select the number of the quiz you would like to attempt.");
-        ArrayList<Question> questionList = playerSession.getQuizQuestions(quiz);
-        doQuiz(quiz, questionList);
-    }
-    /**
-     * Prints the list of questions for the quiz and gets an answer for each question
-     */
-    public void doQuiz(int id, ArrayList<Question> questionList) throws RemoteException{
-        int score = 0;
-        for (int i = 0; i < questionList.size() ; i++) {
-            System.out.println((i + 1) + ". " + questionList.get(i).getText()+ "\n");
-            ArrayList<QuestionOption> options = questionList.get(i).getOptions();
-            for (int j = 0; j < options.size(); j++) {
-                System.out.println((j + 1) + ". " + options.get(j).getText());
+    public void createQuiz() throws RemoteException {
+        System.out.println("\n This is the console where you can create a new quiz!");
+        String title = getStringFromUser("Please enter the name of your quiz below:");
+        //Now we have the title we can create the quiz
+        int quizId = setupSession.createQuiz(title,userId);
+        //Get the number of questions from the user
+        int quizLength = getIntFromUser("That quiz sounds great! It has an id of : " + quizId + ". How many questions will it contain?");
+        for (int i = 0; i < quizLength; i++) {
+            String questionText = getStringFromUser("Please enter the text of question "+(i + 1)+" below (eg. How high is mount everest?) :");
+            //Now we can create the question and assign it to the quiz
+            int questionId = setupSession.addQuestion(quizId,questionText);
+            int optionLength = getIntFromUser("How many choices will this question have?");
+            for (int j = 0; j < optionLength; j++) {
+                String optionText= getStringFromUser("Please enter the text of option "+(j+1)+" below (eg. 39940ft) :");
+                setupSession.addOption(quizId,questionId,optionText);
             }
-            int answer = getIntFromUser("Choose the number of your answer below.");
-            score = (answer == questionList.get(i).getAnswer()) ? score + 1 : score;
+            int answer = getIntFromUser("Please select which option is the correct answer for this question : ");
+            setupSession.setAnswer(quizId,questionId,answer);
         }
-        //Save the player's score
-        playerSession.recordScore(id, playerId, score);
-        System.out.println("Your score was " + score + "/" + (questionList.size()));
+
+        setupSession.saveAll();
+        System.out.println("\nGreat! Your quiz has been saved!");
+
     }
     /**
      * Gets a integer input from the user - does some checking to see if it is valid
@@ -128,7 +127,11 @@ public class QuizPlayer {
     private int getIntFromUser(String output) {
         System.out.println(output);
         String tmpInput = sc.nextLine();
-        if (isNumeric(tmpInput)){
+        if (tmpInput.equals("exit")) {
+            System.out.println("Thanks for stopping by!");
+            System.exit(0);
+            return 1;
+        }else if (isNumeric(tmpInput)){
             return Integer.parseInt(tmpInput);
         } else {
             System.out.println("That's not a valid integer. Please try again!");
@@ -143,10 +146,10 @@ public class QuizPlayer {
     private static boolean isNumeric(String value) {
         try  {
             int test = Integer.parseInt(value);
+
         } catch(NumberFormatException nfe)  {
             return false;
         }
         return true;
     }
-
 }

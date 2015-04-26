@@ -16,5 +16,5 @@ public interface PlayerSession extends Remote {
     //Used to get the questions for a quiz
     ArrayList<Question> getQuizQuestions(int id) throws RemoteException;
     //Used to record scores
-    void recordScore(int quizId,int userId, String score) throws RemoteException;
+    void recordScore(int quizId,int userId, int score) throws RemoteException;
 }

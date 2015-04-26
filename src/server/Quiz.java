@@ -7,6 +7,7 @@ public class Quiz {
     int id;
     int creatorId;
     String title;
+    String status;
 
     public Quiz() {
         questions = new ArrayList<Question>();
@@ -16,6 +17,7 @@ public class Quiz {
         this.id = id;
         this.creatorId = creatorId;
         this.title = title;
+        this.status = "open";
     }
     public void setId(int id){
         this.id = id;
@@ -26,16 +28,17 @@ public class Quiz {
     public int getCreatorId(){
         return this.creatorId;
     }
-
     public void setTitle(String title){
         this.title = title;
     }
-
     public int getId() { return this.id;}
     public String getTitle() {
         return this.title;
     }
     public ArrayList<Question> getQuestions() {return this.questions;}
+    public void setStatus(String status) {this.status = status;}
+    public String getStatus() { return status;}
+
     /**
      * Add a question to the quiz
      * @param question that is going to be added to the list of questions

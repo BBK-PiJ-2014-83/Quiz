@@ -108,6 +108,9 @@ public class QuizServer {
                     case "creatorId":
                         tmpQuiz.setCreatorId(Integer.parseInt(detail.getTextContent()));
                         break;
+                    case "status":
+                        tmpQuiz.setStatus(detail.getTextContent());
+                        break;
                     case "title":
                         tmpQuiz.setTitle(detail.getTextContent());
                         break;
@@ -152,8 +155,7 @@ public class QuizServer {
     private void loadResults() {
         NodeList resultList = file.getItems("result", quizData);
         for (int i = 0; i < resultList.getLength() ; i++) {
-            int userId = 0, quizId = 0;
-            String result ="";
+            int userId = 0, quizId = 0, result=0;
             NodeList resultItems = resultList.item(i).getChildNodes();
             for (int j = 0; j < resultItems.getLength(); j++) {
                 Node detail = resultItems.item(j);
@@ -164,7 +166,7 @@ public class QuizServer {
                     case "quizid":
                         quizId = Integer.parseInt(detail.getTextContent());
                     case "score":
-                        result = detail.getTextContent();
+                        result = Integer.parseInt(detail.getTextContent());
                         break;
                 }
             }
@@ -198,8 +200,10 @@ public class QuizServer {
             for (Quiz quiz : quizzes) {
                 Element tmpQuiz =  quizData.createElement("quiz");
                 file.createNode(quizData,"id",Integer.toString(quiz.getId()),tmpQuiz);
+                file.createNode(quizData,"status",quiz.getStatus(),tmpQuiz);
                 file.createNode(quizData,"creatorId",Integer.toString(quiz.getCreatorId()), tmpQuiz);
                 file.createNode(quizData,"title",quiz.getTitle(),tmpQuiz);
+
                 Element questions = quizData.createElement("questions");
                 //Loop through to get each question
                 for(Question question: quiz.getQuestions()) {
@@ -224,7 +228,7 @@ public class QuizServer {
                 Element tmpResult =  quizData.createElement("result");
                 file.createNode(quizData,"userid",Integer.toString(result.getUserId()),tmpResult);
                 file.createNode(quizData,"quizid",Integer.toString(result.getQuizId()), tmpResult);
-                file.createNode(quizData,"score",result.getResult(), tmpResult);
+                file.createNode(quizData,"score",Integer.toString(result.getResult()), tmpResult);
                 resultsXML.appendChild(tmpResult);
             }
             rootElement.appendChild(resultsXML);
