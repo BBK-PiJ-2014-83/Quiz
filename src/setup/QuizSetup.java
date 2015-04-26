@@ -29,7 +29,8 @@ public class QuizSetup {
             setupSession = (SetupSession) reg.lookup("setupSession");
             System.out.println("Welcome to the quiz program! You are in the setup client.\nType exit to close at any time.");
             userId = userNameCheck();
-            System.out.println("\nThanks for joining us, "+username+". Please select what you would like to do from the list below");
+            System.out.println("\nThanks for joining us, "+username+"! ");
+            giveOptions();
             createQuiz();
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,6 +74,24 @@ public class QuizSetup {
     private String getUserName(boolean newUser) {
         username = getStringFromUser("Please enter your "+((newUser)?"preferred ":"")+"username");
         return username;
+    }
+    private void giveOptions() throws RemoteException{
+        System.out.println("Please select what you would like to do from the list below :");
+        System.out.println("1 - Create a new quiz.");
+        System.out.println("2 - Close a quiz");
+        int option = getIntFromUser("Enter number below :");
+        switch (option) {
+            case 1 :
+                createQuiz();
+                break;
+            case 2 :
+               // closeQuiz();
+                break;
+            default:
+                System.out.println("I didn't understand that! Let's try again.");
+                giveOptions();
+        }
+
     }
     /**
      * Gets a string input from the user - does some checking to see if it is valid
@@ -121,7 +140,7 @@ public class QuizSetup {
 
         setupSession.saveAll();
         System.out.println("\nGreat! Your quiz has been saved!");
-
+        giveOptions();
     }
     /**
      * Gets a integer input from the user - does some checking to see if it is valid
